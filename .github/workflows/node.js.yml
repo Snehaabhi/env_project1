@@ -43,7 +43,7 @@ jobs:
       - name: Find ABB file
         id: find_abb
         run: |
-          ABB_FILE=$(find /home/runner/work/mobileapp/mobileapp -name "*.aab")
+          ABB_FILE=$(find /home/runner/work/env_project1/env_project1 -name "*.aab")
           echo "::set-output name=abb_file::$ABB_FILE"
 
       - name: Upload ABB artifact
