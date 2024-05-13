@@ -1,0 +1,53 @@
+name: Build React Native Android App Locally (EAS)
+
+on:
+  # Define when the workflow should be triggered (e.g., on pushes to the main branch)
+  push:
+    branches: [ main ]
+
+jobs:
+  build-and-download:
+    runs-on: ubuntu-latest  # Replace with your preferred OS (adjust if needed)
+
+    steps:
+      - uses: actions/checkout@v3  # Checkout code from repository
+
+      - name: Install Node.js (if not already installed)
+        uses: actions/setup-node@v3
+        with:
+          node-version: 21  # Adjust based on project requirements (consider LTS versions)
+          cache: 'npm'  # Cache downloaded Node.js and npm packages
+
+      - name: Install Java 17 (if not already installed)
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'adopt'  # Installs OpenJDK from Adoptium
+          java-version: '17'  # Specify desired Java version (adjust if needed)
+
+      - name: Install EAS CLI
+        uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+
+      - name: Install dependencies
+        run: npm install  # Or yarn install (adjust based on your project)
+
+      - name: Build Android app locally (using EAS)
+        run: |
+          eas build --non-interactive --platform android --local
+        env:
+          EAS_VERSION: latest
+          EAS_TOKEN: ${{ secrets.EXPO_TOKEN }} 
+
+      - name: Find ABB file
+        id: find_abb
+        run: |
+          ABB_FILE=$(find /home/runner/work/mobileapp/mobileapp -name "*.aab")
+          echo "::set-output name=abb_file::$ABB_FILE"
+
+      - name: Upload ABB artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: my-abb-file
+          path: ${{ steps.find_abb.outputs.abb_file }}
